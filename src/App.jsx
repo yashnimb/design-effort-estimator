@@ -8,8 +8,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<DesignEstimationForm />} />
-        <Route path="/estimation" element={<EstimationResults />} />
-        {/* Catch-all route to handle direct URL access */}
+        <Route path="/estimations" element={<EstimationResults />} />
         <Route path="*" element={<DesignEstimationForm />} />
       </Routes>
     </Router>

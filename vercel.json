@@ -1,7 +1,10 @@
 {
   "routes": [
-    { "src": "/estimation", "dest": "/" },
+    { "src": "/estimations", "dest": "/" },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/" }
+  ],
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
   ]
 }
