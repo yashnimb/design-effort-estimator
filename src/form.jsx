@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import "./form.css";
 
 const DesignEstimationForm = () => {
   const WEBHOOK_URL = "https://uxlad.app.n8n.cloud/webhook-test/f3e58583-27ea-4654-8cf3-862b4a468b04"; 
-  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     projectName: "",
@@ -87,28 +85,37 @@ const DesignEstimationForm = () => {
     setMessage("");
 
     try {
+      console.log('Sending form data:', formData);
+      
       const response = await fetch(WEBHOOK_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
         body: JSON.stringify(formData),
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        const aiOutput = result[0]?.output || "No output received."; // handle n8n array response
+      console.log('Response status:', response.status);
 
-        // Navigate to estimation page with state
-        navigate("/estimation", {
-          state: {
-            formData,
-            aiOutput,
-          },
-        });
+      if (response.ok) {
+        const result = await response.text(); // Get as text first
+        console.log('Raw n8n response:', result);
+        
+        // Store the raw response and redirect immediately
+        sessionStorage.setItem('estimationData', result);
+        
+        // Redirect to results page
+        window.location.href = '/estimation-results.html'; // Update with your actual path
+        
       } else {
-        setMessage("Failed to get estimation.");
+        const errorText = await response.text();
+        console.error('HTTP error:', response.status, errorText);
+        setMessage(`Failed to get estimation: ${response.status} - ${errorText}`);
       }
     } catch (error) {
-      setMessage("Error sending estimation.");
+      console.error('Network error:', error);
+      setMessage(`Network error: ${error.message}. Check if n8n webhook is running.`);
     } finally {
       setLoading(false);
     }
@@ -117,7 +124,9 @@ const DesignEstimationForm = () => {
   return (
     <div className="form-container">
       <form onSubmit={handleSubmit}>
-        <label>Project Name</label>
+        <h1>Design Estimation Form</h1>
+        
+        <label>Project Name *</label>
         <input
           type="text"
           name="projectName"
@@ -323,6 +332,7 @@ const DesignEstimationForm = () => {
           max="52"
           value={formData.timeline}
           onChange={handleChange}
+          placeholder="Enter number of weeks"
         />
 
         <label>Client Notes</label>
@@ -331,12 +341,18 @@ const DesignEstimationForm = () => {
           value={formData.notes}
           onChange={handleChange}
           rows="3"
+          placeholder="Any additional notes or requirements..."
         />
 
         <button type="submit" disabled={loading}>
-          {loading ? "Sending..." : "Generate Estimation"}
+          {loading ? "Processing..." : "Generate Estimation"}
         </button>
-        {message && <p>{message}</p>}
+        
+        {message && (
+          <div className={`message ${message.includes('error') || message.includes('Failed') ? 'error' : 'success'}`}>
+            {message}
+          </div>
+        )}
       </form>
     </div>
   );
