@@ -8,7 +8,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<DesignEstimationForm />} />
-        <Route path="/estimations" element={<EstimationResults />} />
+        <Route path="/estimations" element={<DesignEstimationResults />} />
         <Route path="*" element={<DesignEstimationForm />} />
       </Routes>
     </Router>
