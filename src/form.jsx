@@ -106,7 +106,7 @@ const DesignEstimationForm = () => {
         sessionStorage.setItem('estimationData', result);
         
         // Redirect to results page
-        window.location.href = '/estimation-results.html'; // Update with your actual path
+        window.location.href = '/estimation'; // Remove .html extension
         
       } else {
         const errorText = await response.text();
