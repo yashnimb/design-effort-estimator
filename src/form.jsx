@@ -103,8 +103,8 @@ const DesignEstimationForm = () => {
         console.log('Raw n8n response:', result);
         
         // Store the raw response and redirect immediately
-        sessionStorage.setItem("estimationData", JSON.stringify(data));
-        window.location.href = '/estimations';  // Updated route
+        sessionStorage.setItem("estimationData", result);
+        window.location.href = '/estimation'; // Fixed: Changed from '/estimations' to '/estimation'
         
       } else {
         const errorText = await response.text();
