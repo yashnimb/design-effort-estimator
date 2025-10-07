@@ -278,7 +278,7 @@ const DesignEstimationForm = () => {
 
         <label>Design Phases</label>
         <div className="checkbox-group">
-          {["Discovery", "Wireframing", "UI Design", "Prototyping"].map((phase) => (
+          {["Immersion", "Discovery", "Foundational Design", "Detailed Design & Delivery"].map((phase) => (
             <label key={phase}>
               <input
                 type="checkbox"
