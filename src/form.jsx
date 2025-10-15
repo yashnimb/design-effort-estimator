@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./form.css";
 
 const DesignEstimationForm = () => {
-  const WEBHOOK_URL = "https://uxlad.app.n8n.cloud/webhook/f3e58583-27ea-4654-8cf3-862b4a468b04"; 
+  const WEBHOOK_URL = "https://uxlad.app.n8n.cloud/webhook-test/f3e58583-27ea-4654-8cf3-862b4a468b04"; 
 
   const [formData, setFormData] = useState({
     projectName: "",
@@ -18,7 +18,7 @@ const DesignEstimationForm = () => {
     screenCount: 0,
     domain: "",
     industry: "",
-    phases: ["Discovery", "Wireframing", "UI Design"],
+    phases: ["Immersion", "Discovery", "Foundational Design", "Detailed Design & Delivery"],
     branding: "No",
     accessibility: "No",
     multilingual: "No",
@@ -85,36 +85,26 @@ const DesignEstimationForm = () => {
     setMessage("");
 
     try {
-      console.log('Sending form data:', formData);
-      
       const response = await fetch(WEBHOOK_URL, {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify(formData),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
       });
 
-      console.log('Response status:', response.status);
-
-      if (response.ok) {
-        const result = await response.text(); // Get as text first
-        console.log('Raw n8n response:', result);
-        
-        // Store the raw response and redirect immediately
-        sessionStorage.setItem("estimationData", result);
-        window.location.href = '/estimation'; // Fixed: Changed from '/estimations' to '/estimation'
-        
-      } else {
-        const errorText = await response.text();
-        console.error('HTTP error:', response.status, errorText);
-        setMessage(`Failed to get estimation: ${response.status} - ${errorText}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      const result = await response.json();
+      
+      // Store the raw response
+      sessionStorage.setItem("estimationData", JSON.stringify(result));
+      
+      // Navigate to results page
+      window.location.href = '/estimations';
+      
     } catch (error) {
-      console.error('Network error:', error);
-      setMessage(`Network error: ${error.message}. Check if n8n webhook is running.`);
-    } finally {
+      setMessage("Error sending estimation: " + error.message);
       setLoading(false);
     }
   };
@@ -278,7 +268,12 @@ const DesignEstimationForm = () => {
 
         <label>Design Phases</label>
         <div className="checkbox-group">
-          {["Discovery", "Wireframing", "UI Design", "Prototyping"].map((phase) => (
+          {[
+            "Immersion",
+            "Discovery", 
+            "Foundational Design",
+            "Detailed Design & Delivery"
+          ].map((phase) => (
             <label key={phase}>
               <input
                 type="checkbox"

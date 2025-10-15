@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AlertCircle } from 'lucide-react';
 
 const FoodyardEstimationResults = () => {
   const [estimationData, setEstimationData] = useState(null);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   // Color schemes based on project type
   const colorSchemes = {
@@ -42,23 +44,41 @@ const FoodyardEstimationResults = () => {
   useEffect(() => {
     try {
       const stored = sessionStorage.getItem("estimationData");
+      
+      // If no data in sessionStorage, redirect to form
       if (!stored) {
-        setError("No estimation data found. Please submit the form first.");
+        navigate('/');
         return;
       }
+
+      // Parse the stored data
+      let parsed = JSON.parse(stored);
       
-      let parsed = safeParse(stored);
+      // Handle n8n array format
       if (Array.isArray(parsed) && parsed[0]?.output) {
-        parsed = safeParse(parsed[0].output);
-      } else if (parsed?.output) {
-        parsed = safeParse(parsed.output);
+        try {
+          parsed = JSON.parse(parsed[0].output);
+        } catch (e) {
+          parsed = parsed[0].output;
+        }
       }
       
-      setEstimationData(typeof parsed === "string" ? safeParse(parsed) : parsed);
+      // Handle string output
+      if (typeof parsed === 'string') {
+        try {
+          parsed = JSON.parse(parsed);
+        } catch (e) {
+          console.error('Error parsing string data:', e);
+        }
+      }
+
+      setEstimationData(parsed);
+      
     } catch (err) {
+      console.error('Error processing data:', err);
       setError("Error loading estimation data: " + err.message);
     }
-  }, []);
+  }, [navigate]);
 
   const merged = estimationData ? { ...estimationData.overview, ...estimationData } : null;
   
@@ -139,11 +159,10 @@ const FoodyardEstimationResults = () => {
     
     const roles = ['Design Director', 'Senior UX Designer', 'UI Designer', 'UX Researcher', 'Content Writer', 'Graphic Designer', 'Accessibility Specialist', 'Design PM'];
     const phaseColors = {
-      'Discovery': { bg: 'bg-red-500', label: 'DISC' },
-      'Strategy': { bg: 'bg-purple-500', label: 'WIRE' },
-      'Design': { bg: 'bg-teal-500', label: 'VIS' },
-      'Prototype': { bg: 'bg-orange-500', label: 'REF' },
-      'Finalization': { bg: 'bg-pink-500', label: 'HAND' }
+      'Immersion': { bg: 'bg-purple-500', label: 'IMM' },
+      'Discovery': { bg: 'bg-blue-500', label: 'DISC' },
+      'Foundational Design': { bg: 'bg-teal-500', label: 'FND' },
+      'Detailed Design & Delivery': { bg: 'bg-orange-500', label: 'DDD' }
     };
 
     return roles.map(role => ({
@@ -478,25 +497,21 @@ const FoodyardEstimationResults = () => {
             {/* Phase Legend */}
             <div className="flex items-center gap-4 mb-6 flex-wrap bg-slate-700 p-4 rounded-lg">
               <span className="text-white font-semibold text-sm mr-4">Phase Legend:</span>
-              <span className="px-3 py-1 bg-red-500 text-white text-xs rounded-full font-medium flex items-center gap-2">
+              <span className="px-3 py-1 bg-purple-500 text-white text-xs rounded-full font-medium flex items-center gap-2">
+                <span className="w-2 h-2 bg-white rounded-full"></span>
+                Immersion
+              </span>
+              <span className="px-3 py-1 bg-blue-500 text-white text-xs rounded-full font-medium flex items-center gap-2">
                 <span className="w-2 h-2 bg-white rounded-full"></span>
                 Discovery
               </span>
-              <span className="px-3 py-1 bg-purple-500 text-white text-xs rounded-full font-medium flex items-center gap-2">
-                <span className="w-2 h-2 bg-white rounded-full"></span>
-                Wireframing
-              </span>
               <span className="px-3 py-1 bg-teal-500 text-white text-xs rounded-full font-medium flex items-center gap-2">
                 <span className="w-2 h-2 bg-white rounded-full"></span>
-                Visual Design
+                Foundational Design
               </span>
               <span className="px-3 py-1 bg-orange-500 text-white text-xs rounded-full font-medium flex items-center gap-2">
                 <span className="w-2 h-2 bg-white rounded-full"></span>
-                Refinement
-              </span>
-              <span className="px-3 py-1 bg-pink-500 text-white text-xs rounded-full font-medium flex items-center gap-2">
-                <span className="w-2 h-2 bg-white rounded-full"></span>
-                Handoff
+                Detailed Design & Delivery
               </span>
             </div>
 
